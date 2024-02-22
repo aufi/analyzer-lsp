@@ -153,6 +153,15 @@ func (a AndCondition) Evaluate(ctx context.Context, log logr.Logger, condCtx Con
 		TemplateContext: map[string]interface{}{},
 	}
 	conditions := sortConditionEntries(a.Conditions)
+	fmt.Printf("#####################################   a.conditions(%d): %+v  #####################################################\n", len(a.Conditions), a.Conditions)
+	for i, c := range a.Conditions {
+		fmt.Printf("#####################################   %d: %+v\n", i, c)
+	}
+
+	fmt.Printf("#####################################   sorted conditions(%d): %+v  #####################################################\n", len(conditions), conditions)
+	for i, c := range conditions {
+		fmt.Printf("#####################################   %d: %+v\n", i, c)
+	}
 	for _, c := range conditions {
 		if _, ok := condCtx.Template[c.From]; !ok && c.From != "" {
 			// Short circut w/ error here
@@ -277,10 +286,11 @@ func incidentsToFilepaths(incident []IncidentContext) []string {
 
 func sortConditionEntries(entries []ConditionEntry) []ConditionEntry {
 	sorted := []ConditionEntry{}
-	for _, e := range entries {
+	for i, e := range entries {
 		// entries without chaining or that begin a chain come first
 		if e.From == "" {
-			sorted = append(sorted, gatherChain(e, entries)...)
+			subEntries := append(entries[:i], entries[i+1:]...)
+			sorted = append(sorted, gatherChain(e, subEntries)...)
 		}
 	}
 
@@ -289,9 +299,14 @@ func sortConditionEntries(entries []ConditionEntry) []ConditionEntry {
 
 func gatherChain(start ConditionEntry, entries []ConditionEntry) []ConditionEntry {
 	chain := []ConditionEntry{start}
-	for _, d := range entries {
-		if start.As == d.From && start.As != "" {
-			chain = append(chain, gatherChain(d, entries)...)
+	haveNext := false
+	for i, d := range entries {
+		if start.As == d.From && start.As != "" && !haveNext {
+			subEntries := append(entries[:i], entries[i+1:]...)
+			if d.From != start.From && d.As != start.As {
+				chain = append(chain, gatherChain(d, subEntries)...)
+				haveNext = true
+			}
 		}
 	}
 	return chain

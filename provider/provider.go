@@ -533,8 +533,11 @@ type DependencyCondition struct {
 }
 
 func (dc DependencyCondition) Evaluate(ctx context.Context, log logr.Logger, condCtx engine.ConditionContext) (engine.ConditionResponse, error) {
+	// asi tady v té metodě někde je potřeba jít na parenta (nebo top) od matched.dep a psát do ní nebo toho parenta extras
 	_, span := tracing.StartNewSpan(ctx, "dep-condition")
 	defer span.End()
+
+	log.Info(fmt.Sprintf("############################################################# evaluating dc, ctx %+v", condCtx))
 
 	resp := engine.ConditionResponse{}
 	deps, err := dc.Client.GetDependencies(ctx)
@@ -554,6 +557,7 @@ func (dc DependencyCondition) Evaluate(ctx context.Context, log logr.Logger, con
 		for _, dep := range ds {
 			if dep.Name == dc.Name {
 				matchedDeps = append(matchedDeps, matchedDep{dep: dep, uri: u})
+				log.Info(fmt.Sprintf("############################################################# matched dep %+v %s", dep, u))
 				break
 			}
 			if dc.NameRegex != "" && regex.MatchString(dep.Name) {
@@ -640,6 +644,7 @@ func (dc DependencyCondition) Evaluate(ctx context.Context, log logr.Logger, con
 				"version": matchedDep.dep.Version,
 			},
 		}
+
 		if depLocationResolver != nil {
 			// this is a best-effort step and we don't want to block if resolver misbehaves
 			timeoutContext, cancelFunc := context.WithTimeout(context.Background(), time.Second*3)

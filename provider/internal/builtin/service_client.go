@@ -101,6 +101,7 @@ func (p *builtinServiceClient) Evaluate(ctx context.Context, cap string, conditi
 		}
 
 		for _, match := range matches {
+			p.log.V(5).Info(fmt.Sprintf("#####################################   match: %+v  ##################################################### ", match))
 			//TODO(fabianvf): This will not work if there is a `:` in the filename, do we care?
 			pieces := strings.SplitN(match, ":", 3)
 			if len(pieces) != 3 {
@@ -184,6 +185,7 @@ func (p *builtinServiceClient) Evaluate(ctx context.Context, cap string, conditi
 						incident.LineNumber = &lineNo
 					}
 					response.Incidents = append(response.Incidents, incident)
+					p.log.V(5).Info(fmt.Sprintf("#####################################   incident: %+v  ##################################################### ", incident))
 				}
 			}
 		}

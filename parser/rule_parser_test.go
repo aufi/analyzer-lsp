@@ -269,6 +269,43 @@ func TestLoadRules(t *testing.T) {
 			},
 		},
 		{
+			Name:         "test-and-rule-as-from",
+			testFileName: "rule-and-as-from.yaml",
+			providerNameClient: map[string]provider.InternalProviderClient{
+				"builtin": testProvider{
+					caps: []provider.Capability{{
+						Name: "file",
+					}},
+				},
+				"notadded": testProvider{
+					caps: []provider.Capability{{
+						Name: "fake",
+					}},
+				},
+			},
+			ExpectedRuleSet: map[string]engine.RuleSet{
+				"konveyor-analysis": {
+					Rules: []engine.Rule{
+						{
+							RuleMeta: engine.RuleMeta{
+								RuleID:      "file-001",
+								Description: "",
+								Category:    &konveyor.Potential,
+							},
+							Perform: engine.Perform{Message: engine.Message{Text: &allGoAndJsonFiles, Links: []konveyor.Link{}}},
+						},
+					},
+				},
+			},
+			ExpectedProvider: map[string]provider.InternalProviderClient{
+				"builtin": testProvider{
+					caps: []provider.Capability{{
+						Name: "file",
+					}},
+				},
+			},
+		},
+		{
 			Name:         "test-or-rule",
 			testFileName: "rule-or.yaml",
 			providerNameClient: map[string]provider.InternalProviderClient{
@@ -708,6 +745,11 @@ func TestLoadRules(t *testing.T) {
 			}
 			if len(tc.ExpectedRuleSet) != 0 && len(ruleSets) == 0 {
 				t.Errorf("unable to get correct ruleSets")
+				return
+			}
+
+			if len(tc.ExpectedRuleSet) != len(ruleSets) {
+				t.Errorf("differenct ruleset len exected %d, got %d", len(tc.ExpectedRuleSet), len(ruleSets))
 				return
 			}
 

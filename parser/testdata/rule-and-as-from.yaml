@@ -1,0 +1,15 @@
+---
+- message: beans.xml files
+  ruleID: file-xml-35
+  when:
+    and:
+    - as: result
+      builtin.filecontent:
+        filePattern: ""
+        pattern: version=("|')1.1("|')
+      from: xml-file
+    - as: xml-file
+      builtin.xml:
+        namespaces:
+          p: http://xmlns.jcp.org/xml/ns/javaee
+        xpath: p:beans[@version='1.1']

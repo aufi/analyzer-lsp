@@ -368,6 +368,7 @@ func (r *RuleParser) LoadRule(filepath string) ([]engine.Rule, map[string]provid
 					noConditions = true
 				}
 				rule.When = engine.AndCondition{Conditions: conditions}
+				fmt.Printf("---------------------------------- parsed conditions: %+v\n",conditions)
 				snippers := []engine.CodeSnip{}
 				for k, prov := range provs {
 					if snip, ok := prov.(engine.CodeSnip); ok {

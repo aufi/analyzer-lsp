@@ -231,14 +231,29 @@
         deprecatedIn: "v1.9.0"
         removedIn: "v1.16.0"
         replacementAPI: "apps/v1"
-- category: potential
-  description: "Test code snippets when match is a key of a XML node"
-  message: "The code snippet should point to <beans> in the beans.xml file"
-  ruleID: xml-test-key-match
+- category: mandatory
+  customVariables: []
+  description: Replace the Java EE version with the Jakarta equivalent
+  effort: 1
+  labels:
+  - konveyor.io/target=jakarta-ee9+
+  - konveyor.io/target=jakarta-ee
+  - konveyor.io/target=eap8
+  - konveyor.io/target=eap
+  - konveyor.io/source
+  links: []
+  message: '`beans_1_1.xsd`: In the root tag, replace the `version` attribute value
+    with `3.0`'
+  ruleID: javaee-to-jakarta-namespaces-00035
   when:
-    builtin.xml:
-      filepaths:
-      - beans.xml
-      namespaces:
-        b: http://xmlns.jcp.org/xml/ns/javaee
-      xpath: /b:beans
+    and:
+    - as: result
+      builtin.filecontent:
+        filePattern: ""
+        pattern: version=("|')1.1("|')
+      from: xml-file
+    - as: xml-file
+      builtin.xml:
+        namespaces:
+          p: http://xmlns.jcp.org/xml/ns/javaee
+        xpath: p:beans[@version='1.1']
